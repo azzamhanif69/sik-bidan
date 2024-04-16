@@ -63,7 +63,8 @@ Route::get(
 
 // dashboard admin rekam medis
 Route::resource('/admin/medis', AdminMedisController::class)->middleware('admin');
-
+Route::get('/search-patient', [AdminMedisController::class, 'searchPatient'])->middleware('admin');
+Route::get('/search-prescription', [AdminMedisController::class, 'searchPrescription'])->middleware('admin');
 
 
 // dashboard admin pengaturan
