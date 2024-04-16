@@ -27,30 +27,35 @@ class AdminMedisController extends Controller
      */
     public function create(Request $request)
     {
-        if ($request->wantsJson()) {
-            $pasien = Pasien::where('name', 'LIKE', '%' . $request->get('q') . '%')
-                ->orWhere('no_rm', 'LIKE', '%' . $request->get('q') . '%')
-                ->get();
-            return response()->json($pasien, 200);
-        } else {
-            $medis = Medis::with('pasien', 'obat')->get();
-            return view('admin.medis.tambah', [
-                'app' => Application::all(),
-                'tittle' => 'Rekam Medis Baru',
-                'medis' => $medis,
-                'pasien' => Pasien::all() // Atau sesuaikan query yang diperlukan
-            ]);
-        }
+        // if ($request->wantsJson()) {
+        //     $data = [];
+        //     if ($request->has('q')) {
+        //         $data['pasien'] = Pasien::where('name', 'LIKE', '%' . $request->get('q') . '%')
+        //             ->orWhere('no_rm', 'LIKE', '%' . $request->get('q') . '%')
+        //             ->get();
+        //         $data['resep'] = Obat::where('nama_obat', 'LIKE', '%' . $request->get('r') . '%')->get();
+        //     }
+        //     return response()->json($data, 200);
+        // } else {
+        //     $medis = Medis::with('pasien', 'obat')->get();
+        //     return view('admin.medis.tambah', [
+        //         'app' => Application::all(),
+        //         'tittle' => 'Rekam Medis Baru',
+        //         'medis' => $medis,
+        //         'pasien' => Pasien::all(),
+        //         'resep' => Obat::all()
+        //     ]);
+        // }
+
+        $medis = Medis::with('pasien', 'obat')->get();
+        return view('admin.medis.tambah', [
+            'app' => Application::all(),
+            'tittle' => 'Rekam Medis Baru',
+            'medis' => $medis,
+            'pasien' => Pasien::all(),
+            'resep' => Obat::all()
+        ]);
     }
-    // $medis = Medis::with('pasien', 'obat')->get();
-    // $pasien = Pasien::where('name', 'LIKE', '%' . $request->get('q') . '%')->get(); // Mengambil semua pasien
-    // return view('admin.medis.tambah', [
-    //     'app' => Application::all(),
-    //     'tittle' => 'Rekam Medis Baru',
-    //     'medis' => $medis,
-    //     'pasien' => $pasien
-    // ]);
-    // return response()->json($pasien, 200);
 
 
     /**
@@ -106,5 +111,22 @@ class AdminMedisController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    public function searchPatient(Request $request)
+    {
+        if ($request->wantsJson() && $request->has('q')) {
+            $patients = Pasien::where('name', 'LIKE', '%' . $request->get('q') . '%')
+                ->orWhere('no_rm', 'LIKE', '%' . $request->get('q') . '%')
+                ->get();
+            return response()->json(['pasien' => $patients], 200);
+        }
+    }
+
+    public function searchPrescription(Request $request)
+    {
+        if ($request->wantsJson() && $request->has('q')) {
+            $prescriptions = Obat::where('nama_obat', 'LIKE', '%' . $request->get('q') . '%')->get();
+            return response()->json(['resep' => $prescriptions], 200);
+        }
     }
 }
