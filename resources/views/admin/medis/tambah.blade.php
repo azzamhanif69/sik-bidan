@@ -70,6 +70,69 @@
                             @enderror
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="keluhan">Keluhan</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="keluhan" id="keluhan"
+                                class="form-control @error('keluhan') is-invalid @enderror" aria-label="keluhan"
+                                value="{{ old('keluhan') }}" placeholder="Masukkan Keluhan">
+                            @error('keluhan')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="resep">Resep</label>
+                        <div class="col-sm-10">
+                            <select name="resep" id="resep"
+                                class="form-control select2 @error('resep') is-invalid @enderror" aria-label="resep">
+                                <option></option>
+                                @foreach ($resep as $r)
+                                    <option value="{{ $r->id }}" @if (old('resep') == $r->id) selected @endif>
+                                        {{ $r->nama_obat . ' ' . $r->sediaan . ' ' . $r->dosis . ' ' . $r->satuan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('resep')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="aturan">Aturan</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="aturan" id="aturan"
+                                class="form-control @error('aturan') is-invalid @enderror" aria-label="aturan"
+                                value="{{ old('aturan') }}" placeholder="Masukkan Aturan">
+                            @error('aturan')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label" for="jumlah">Jumlah</label>
+                        <div class="col-sm-10">
+                            <input type="number" name="jumlah" id="jumlah"
+                                class="form-control @error('jumlah') is-invalid @enderror" aria-label="jumlah"
+                                value="{{ old('jumlah') }}" placeholder="Masukkan Jumlah">
+                            @error('jumlah')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row justify-content-end">
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -77,30 +140,64 @@
     @push('script')
         <script>
             $(document).ready(function() {
+                // Inisialisasi Select2 untuk pencarian pasien
                 $('#pasien').select2({
-                    ajax: {
-                        url: "{{ route('medis.create') }}", // Pastikan route ini benar
-                        dataType: 'json',
-                        data: function(params) {
-                            return {
-                                q: params.term // parameter pencarian untuk query
-                            };
-                        },
-                        processResults: function(data) {
-                            return {
-                                results: data.map(function(item) {
-                                    return {
-                                        id: item.id,
-                                        text: item.no_rm + ' | ' + item.name
-                                    }; // Sesuaikan dengan struktur objek `pasien` Anda
-                                })
-                            };
-                        }
-                    },
                     placeholder: "Pilih Pasien",
                     allowClear: true,
                     theme: "bootstrap",
-                    minimumInputLength: 2, // Minimal karakter sebelum melakukan request
+                    minimumInputLength: 2,
+                    ajax: {
+                        url: '/search-patient', // Endpoint pencarian pasien
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term // term pencarian
+                            };
+                        },
+                        processResults: function(data) {
+                            // Ubah data menjadi format yang dibutuhkan Select2
+                            return {
+                                results: data.pasien.map(function(item) {
+                                    return {
+                                        id: item.id,
+                                        text: item.no_rm + ' | ' + item.name
+                                    };
+                                })
+                            };
+                        },
+                        cache: true
+                    }
+                });
+                // Inisialisasi Select2 untuk pencarian resep
+                $('#resep').select2({
+                    placeholder: "Pilih Resep",
+                    allowClear: true,
+                    theme: "bootstrap",
+                    minimumInputLength: 2,
+                    ajax: {
+                        url: '/search-prescription', // Endpoint pencarian resep
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term // term pencarian
+                            };
+                        },
+                        processResults: function(data) {
+                            // Ubah data menjadi format yang dibutuhkan Select2
+                            return {
+                                results: data.resep.map(function(item) {
+                                    return {
+                                        id: item.id,
+                                        text: item.nama_obat + '   ' + item.sediaan + '   ' + item
+                                            .dosis + '   ' + item.satuan
+                                    };
+                                })
+                            };
+                        },
+                        cache: true
+                    }
                 });
             });
         </script>
