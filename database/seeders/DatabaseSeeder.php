@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Obat;
 use App\Models\User;
+use App\Models\Pasien;
 use App\Models\Application;
 use Illuminate\Database\Seeder;
 
@@ -30,13 +32,13 @@ class DatabaseSeeder extends Seeder
             'address' => 'Jalan blablabla..'
         ]);
         User::create([
-            'name' => 'admin',
+            'name' => 'Nama Bidan',
             'email' => 'admin@gmail.com',
             'username' => 'admin',
             'image' => 'profil-images/1.jpeg',
             'is_admin' => 1,
             'gender' => 'Laki-Laki',
-            'password' => bcrypt('@Admin123')
+            'password' => bcrypt('rahasia')
         ]);
 
         User::create([
@@ -47,6 +49,23 @@ class DatabaseSeeder extends Seeder
             'is_admin' => 2,
             'gender' => 'Laki-Laki',
             'password' => bcrypt('rahasia')
+        ]);
+        Pasien::create([
+            'no_rm' => '100000',
+            'name' => 'pasien',
+            'birth' => '1999-12-12',
+            'address' => 'malang',
+            'date_of_birth' => '20',
+            'gender' => 'Perempuan',
+            'phone' => '0000'
+        ]);
+        Obat::create([
+            'nama_obat' => 'Obat',
+            'sediaan' => 'Tablet',
+            'dosis' => 500,
+            'satuan' => 'mg',
+            'stok' => 10,
+            'harga' => 'Rp 1.000.000'
         ]);
     }
 }

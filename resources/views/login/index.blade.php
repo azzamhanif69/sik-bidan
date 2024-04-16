@@ -32,9 +32,10 @@
     <script src="{{ asset('assets/vendors/assets/js/config.js') }}"></script>
 </head>
 
-<body>
-    <!-- Content -->
+{{-- <body style="background:#3030b4;"> --}}
+<!-- Content -->
 
+<body>
     <div class="container-xxl">
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner">
@@ -52,7 +53,7 @@
                             </a>
                         </div>
                         <!-- /Logo -->
-                        <h4 class="mb-2">Selamat Datang ! </h4>
+                        <h4 class="mb-2"><b>Selamat Datang ! </b></h4>
                         <p class="mb-4">Silahkan login untuk mengelola data pasien.</p>
                         <div class="flash-message"
                             data-flash-message="@if (session()->has('loginError')) {{ session('loginError') }} @endif">

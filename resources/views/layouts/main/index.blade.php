@@ -11,13 +11,16 @@
         href="@if (Storage::disk('public')->exists('logo-aplikasi')) {{ asset('storage/' . $app[0]->logo) }} @else {{ asset('assets/img/logo-aplikasi/logo.svg') }} @endif" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css"
+        rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
         rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('assets/vendors/assets/vendor/fonts/boxicons.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendors/assets/vendor/css/core.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendors/assets/vendor/css/theme.css') }}" />
@@ -32,6 +35,8 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/libs/sweetalert2/sweetalert.css') }}">
     <script src="{{ asset('assets/vendors/libs/sweetalert2/sweetalert.js') }}"></script>
     <script src="{{ asset('assets/vendors/assets/js/config.js') }}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    @routes
 </head>
 
 <body>
@@ -164,13 +169,11 @@
                                         </button>
                                     </li>
                                     <li>
-                                        <form action="/logout" method="post">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="bx bx-power-off me-2"></i>
-                                                <span class="align-middle">Logout</span>
-                                            </button>
-                                        </form>
+                                        <button type="submit" class="dropdown-item" data-toggle="modal"
+                                            data-target="#logoutModal">
+                                            <i class="bx bx-power-off me-2 mt-1 float-start"></i>
+                                            <span class="align-middle">Logout</span>
+                                        </button>
                                     </li>
                                 </ul>
                             </li>
@@ -202,6 +205,36 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
 
+    <!-- Modal logut-->
+    <div class="modal fade" id="logoutModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true"
+        aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form action="/logout" method="post">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header d-flex justify-content-between">
+                        <h5 class="modal-title text-primary fw-bold">Konfirmasi&nbsp;<i
+                                class='bx bx-check-shield fs-5' style="margin-bottom: 3px;"></i></h5>
+                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-dismiss="modal"><i
+                                class="bx bx-x-circle text-danger fs-4" data-bs-toggle="tooltip"
+                                data-popup="tooltip-custom" data-bs-placement="auto" title="Tutup"></i></button>
+                    </div>
+                    <div class="modal-body" style="margin-top: -10px;">
+                        <div class="col-sm fs-6"> Yakin Mau Keluar ?</div>
+                    </div>
+                    <div class="modal-footer" style="margin-top: -5px;">
+                        <button type="button" class="btn btn-outline-danger" data-dismiss="modal"><i
+                                class='bx bx-share fs-6' style="margin-bottom: 3px;"></i>&nbsp;Tidak</button>
+                        <button type="submit" class="btn btn-primary"><i class='bx bx-log-in-circle'
+                                style="margin-bottom: 3px;"></i>&nbsp;Ya, Keluar!</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
     <script src="{{ asset('assets/js/script.js') }}"></script>
     <script src="{{ asset('assets/vendors/assets/vendor/libs/popper/popper.js') }}"></script>
     <script src="{{ asset('assets/vendors/assets/vendor/js/bootstrap.js') }}"></script>
@@ -211,6 +244,11 @@
     <script src="{{ asset('assets/vendors/assets/js/main.js') }}"></script>
     <script src="{{ asset('assets/vendors/assets/js/dashboards-analytics.js') }}"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    @stack('script')
+    @yield('script')
 </body>
 
 </html>

@@ -63,7 +63,7 @@ $(".buttonEditPatient").on("click", function () {
     const old = $(this).data("old");
     const gender = $(this).data("gender");
     $("#codeEditPatient").val(code);
-    $("#nama_lengkap_patient").val(name);
+    $("#name").val(name);
     $("#address").val(address);
     $("#old").val(old);
     gender == "Laki-Laki"
@@ -75,9 +75,9 @@ $(".buttonEditPatient").on("click", function () {
 $(".cancelModalEditPatient").on("click", function () {
     $(".modalAdminEditPatient")[0].reset();
     $(
-        "#formModalAdminEditPatient #nama_lengkap_patient, #formModalAdminEditPatient #address, #formModalAdminEditPatient #old, #formModalAdminEditPatient #gender"
+        "#formModalAdminEditPatient #name, #formModalAdminEditPatient #address, #formModalAdminEditPatient #old, #formModalAdminEditPatient #gender"
     ).removeClass("is-invalid");
     $(
-        "#formModalAdminEditPatient #nama_lengkap_patient, #formModalAdminEditPatient #address, #formModalAdminEditPatient #old, #formModalAdminEditPatient #gender_patient"
+        "#formModalAdminEditPatient #name, #formModalAdminEditPatient #address, #formModalAdminEditPatient #old, #formModalAdminEditPatient #gender_patient"
     ).removeClass("invalid-feedback");
 });
