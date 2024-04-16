@@ -244,7 +244,7 @@
                 theme: "bootstrap",
                 placeholder: "Pilih Obat",
                 width: '100%',
-                dropdownParent: $('#tambahStokModal'), // Pastikan dropdown muncul di atas modal
+                dropdownParent: $('#tambahStokModal'),
                 ajax: {
                     url: '{{ route('cari.obat') }}', // Sesuaikan dengan URL endpoint Anda
                     dataType: 'json',
