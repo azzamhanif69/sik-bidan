@@ -17,6 +17,21 @@
                 justify-content: end;
             }
         }
+
+        .form-control {
+            width: auto;
+            /* Input tanggal akan mempertahankan lebar berdasarkan kontennya */
+            flex-grow: 2;
+            /* Input tanggal akan tumbuh lebih banyak dari tombol */
+        }
+
+
+        .bullet {
+            font-weight: bold;
+            font-size: 1.1em;
+            /* Membuat teks lebih tebal */
+        }
+    </style>
     </style>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -30,18 +45,22 @@
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between" style="margin-bottom: -0.7rem;">
                     <div class="justify-content-start d-none d-md-block">
-                        <form action="" method="POST">
+                        <form action="" method="post">
                             <div class="d-flex align-items-center">
-                                <div class="row">
-                                    <div class="col-auto">
-                                        <a href="/admin/medis/create" type="button"
-                                            class="btn btn-xs btn-dark fw-bold p-2">
-                                            <i class='bx bx-add-to-queue'></i>&nbsp; Rekam Medis Baru
-                                        </a>
-                                    </div>
-                                </div>
+                                <a href="/admin/medis/create" class="btn btn-xs btn-dark fw-bold me-3 p-2">
+                                    <i class='bx bx-add-to-queue'></i> Rekam Medis Baru
+                                </a>
+                                <form action="/admin/medis" method="post">
+                                    <input class="form-control flex-grow-1 me-2" type="date" id="start_date"
+                                        name="start_date" value="{{ request('id="end_date" name="end_date"') }}" />
+                                    <div class="me-2">-</div>
+                                    <input class="form-control flex-grow-1 me-2" type="date" iid="end_date"
+                                        name="end_date"value="{{ request('end_date') }}" />
+                                    <!-- Tempatkan elemen pencarian atau tombol di sini jika diperlukan -->
+                                </form>
                             </div>
                         </form>
+
                     </div>
                     <div class="justify-content-end">
                         <!-- Search -->
@@ -71,10 +90,61 @@
                                     </tr>
                                 </thead>
                                 <tbody class="table-border-bottom-0">
+                                    @foreach ($rekamMedisList as $index => $medis)
+                                        <!-- Tampilkan informasi rekam medis -->
+                                        <tr>
+                                            <!-- Kita asumsikan kolom pasien_id menyimpan ID atau nama pasien -->
+                                            <td>{{ $loop->iteration }} </td>
+                                            <td><span
+                                                    class="badge bg-label-secondary fw-bold">{{ $medis->pasien->no_rm }}</span>
+                                            </td>
+                                            <td>{{ $medis->pasien->name }}</td>
+                                            <td class="text-justify">
+                                                {{ Carbon\Carbon::parse($medis->created_at)->locale('id')->isoFormat('D MMMM YYYY | H:mm') }}WIB
+
+                                            </td>
+                                            <td>{{ $medis->keluhan }}</td>
+                                            <td>
+                                                @foreach ($medis->reseps as $resep)
+                                                    <span class="bullet">&bull;</span> {{ $resep->obat->nama_obat }}
+                                                    {{ $resep->obat->sediaan }}
+                                                    {{ $resep->obat->dosis }}{{ $resep->obat->satuan }},
+                                                    {{ $resep->jumlah }} pcs : {{ $resep->aturan }}
+                                                    @if (!$loop->last)
+                                                        <br>
+                                                    @endif
+                                                @endforeach
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="/admin/medis/{{ $medis->id }}/edit" type="button"
+                                                    class="btn btn-icon btn-warning btn-sm" data-bs-toggle="tooltip"
+                                                    data-popup="tooltip-custom" data-bs-placement="auto" title="Edit Medis">
+                                                    <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
+                                                </a>
+                                                <button type="button"
+                                                    class="btn btn-icon btn-danger btn-sm buttonDeleteMedis"
+                                                    data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                    data-bs-placement="auto" title="Hapus Medis" id="buttonDeleteMedis">
+                                                    <span class="tf-icons bx bx-trash" style="font-size: 14px;"></span>
+                                                </button>
+
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                    @if ($rekamMedisList->isEmpty())
+                                        <tr>
+                                            <td colspan="100" class="text-center">Tidak ada data Rekam Medis!</td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
                     </ul>
+                    @if (!$rekamMedisList->isEmpty())
+                        <div class="mt-3 pagination-mobile">
+                            {{ $rekamMedisList->withQueryString()->onEachSide(1)->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

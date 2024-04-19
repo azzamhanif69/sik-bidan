@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('reseps', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('medis_id')->constrained('medis')->onDelete('cascade');
+            $table->foreignUuid('obat_id')->constrained('obats');
+            $table->integer('jumlah');
+            $table->string('aturan');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('reseps');
+    }
+};

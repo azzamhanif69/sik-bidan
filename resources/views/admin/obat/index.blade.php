@@ -223,10 +223,8 @@
             </form>
         </div>
     </div>
-
-
-
     </div>
+    @include('sweetalert::alert')
     <script>
         //deleteobat
         $(".buttonDeleteObat").on("click", function() {
@@ -262,6 +260,14 @@
                     cache: true
                 },
                 minimumInputLength: 2,
+                language: {
+                    inputTooShort: function() {
+                        return "Masukkan setidaknya 2 karakter";
+                    },
+                    noResults: function() {
+                        return "Data tidak ditemukan";
+                    }
+                },
                 templateResult: function(obat) {
                     if (obat.loading) return obat.text; // Tampilkan teks loading atau teks pencarian
                     var $container = $(
@@ -287,5 +293,4 @@
             });
         });
     </script>
-    @include('sweetalert::alert')
 @endsection

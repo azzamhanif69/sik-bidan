@@ -13,8 +13,16 @@ class Obat extends Model
     protected $guarded = ['id'];
     public function scopeFilter($query, array $filters)
     {
-        $query->when($filters['search'] ?? false, function ($query, $search) {
-            return $query->where('nama_obat', 'like', '%' . $search . '%')->OrWhere('sediaan', 'like', '%' . $search . '%');
+        $query->when(isset($filters['search']), function ($query) use ($filters) {
+            return $query->where(function ($query) use ($filters) {
+                $search = $filters['search'];
+                $query->where('nama_obat', 'like', '%' . $search . '%')
+                    ->orWhere('sediaan', 'like', '%' . $search . '%');
+            });
         });
+    }
+    public function reseps()
+    {
+        return $this->hasMany(Resep::class);
     }
 }

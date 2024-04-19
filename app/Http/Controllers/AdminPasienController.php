@@ -14,12 +14,17 @@ class AdminPasienController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // Di dalam controller
+
+    public function index(Request $request)
     {
+        $filters = $request->only('search'); // Ambil filter dari request
+        $pasiens = Pasien::filter($filters)->paginate(10); // Terapkan filter pada query
+
         return view('admin.pasien.index', [
             'app' => Application::all(),
             'tittle' => 'Data Pasien',
-            'pasiens' => Pasien::first()->filter(request(['search']))->paginate(10)
+            'pasiens' => $pasiens,
         ]);
     }
 

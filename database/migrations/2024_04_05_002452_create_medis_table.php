@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('medis', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('pasien_id')->constrained('pasiens')->onDelete('cascade');
-            $table->foreignUuid('obat_id')->constrained('obats')->onDelete('cascade');
-            $table->string('nama_pasien');
+            // $table->foreignUuid('obat_id')->constrained('obats')->onDelete('cascade');
             $table->string('keluhan');
-            $table->string('resep');
-            $table->string('aturan');
-            $table->integer('jumlah');
+            // $table->string('resep');
+            // $table->string('aturan');
+            // $table->integer('jumlah');
             $table->timestamps();
         });
     }

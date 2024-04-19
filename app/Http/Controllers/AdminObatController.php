@@ -11,15 +11,20 @@ class AdminObatController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // Di dalam controller
+
+    public function index(Request $request)
     {
+        $filters = $request->only('search'); // Ambil filter dari request
+        $obats = Obat::filter($filters)->paginate(10); // Terapkan filter pada query
+
         return view('admin.obat.index', [
             'app' => Application::all(),
             'tittle' => 'Data Obat',
-            'obats' => Obat::first()->filter(request(['search']))->paginate(10)
-
+            'obats' => $obats,
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.

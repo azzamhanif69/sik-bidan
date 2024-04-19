@@ -12,6 +12,8 @@ class Pasien extends Model
     use HasFactory, HasUuids;
     protected $guarded = ['id'];
 
+    // Di dalam model Pasien.php
+
     public function scopeFilter($query, array $filters)
     {
         $query->when($filters['search'] ?? false, function ($query, $search) {
@@ -20,6 +22,7 @@ class Pasien extends Model
                 ->orWhere('no_rm', 'like', '%' . $search . '%');
         });
     }
+
     public function medis()
     {
         return $this->hasMany(Medis::class);

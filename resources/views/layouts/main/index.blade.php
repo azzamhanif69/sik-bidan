@@ -234,7 +234,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
     <script src="{{ asset('assets/js/script.js') }}"></script>
     <script src="{{ asset('assets/vendors/assets/vendor/libs/popper/popper.js') }}"></script>
     <script src="{{ asset('assets/vendors/assets/vendor/js/bootstrap.js') }}"></script>
@@ -246,9 +245,8 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    @stack('script')
     @yield('script')
+    {{-- @stack('script') --}}
 </body>
 
 </html>

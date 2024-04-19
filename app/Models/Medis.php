@@ -13,7 +13,15 @@ class Medis extends Model
     use HasFactory, HasUuids;
     protected $guarded = ['id'];
 
-
+    public function scopeFilter($query, $search)
+    {
+        if ($search) {
+            return $query->whereHas('pasien', function ($subQuery) use ($search) {
+                $subQuery->where('name', 'like', '%' . $search . '%');
+            });
+        }
+        return $query;
+    }
     public function pasien()
     {
         return $this->belongsTo(Pasien::class, 'pasien_id');
@@ -21,6 +29,10 @@ class Medis extends Model
 
     public function obat()
     {
-        return $this->belongsTo(Obat::class);
+        return $this->belongsTo(Obat::class, 'obat_id');
+    }
+    public function reseps()
+    {
+        return $this->hasMany(Resep::class);
     }
 }
