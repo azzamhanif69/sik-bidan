@@ -21,4 +21,8 @@ class Resep extends Model
     {
         return $this->belongsTo(Obat::class, 'obat_id');
     }
+    public function reseps()
+    {
+        return $this->hasMany(Resep::class, 'medis_id');
+    }
 }

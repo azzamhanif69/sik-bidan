@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Obat;
 use App\Models\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminObatController extends Controller
 {
@@ -128,5 +130,60 @@ class AdminObatController extends Controller
             });
 
         return response()->json(['results' => $obat]);
+    }
+    public function filters(Request $request)
+    {
+        $filters = $request->except(['_token', 'page']); // Menghilangkan token CSRF dan parameter halaman
+        $request->session()->put('obat_filters', $filters);
+        $startDate = $request->startDate; // Asumsi sudah dalam format 'Y-m-d'
+        $endDate = $request->endDate;     // Asumsi sudah dalam format 'Y-m-d'
+
+        // Jika startDate atau endDate tidak tersedia, kembalikan pesan error
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Tanggal awal dan akhir diperlukan.');
+        }
+
+        // Format tanggal sesuai yang dibutuhkan dan query dengan whereBetween
+        $startDate = Carbon::parse($startDate)->startOfDay();  // Mengatur ke awal hari
+        $endDate = Carbon::parse($endDate)->endOfDay();        // Mengatur ke akhir hari
+
+        $obats = Obat::whereBetween('created_at', [$startDate, $endDate])->paginate(10)->withQueryString();
+
+        return view('admin.obat.index', [
+            'app' => Application::all(),
+            'tittle' => 'Data Obat',
+            'obats' => $obats,
+        ], compact('obats'));
+    }
+    public function downloadPDF(Request $request)
+    {
+        // Ambil filter dari sesi
+        $filters = $request->session()->get('obat_filters', []);
+
+        // Query berdasarkan filter yang disimpan di sesi
+        $query = Obat::query();
+
+        // Pastikan Anda mengonversi tanggal ke format yang sesuai sebelum digunakan dalam query
+        if (!empty($filters['startDate'])) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $filters['startDate'])->startOfDay();
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        if (!empty($filters['endDate'])) {
+            $endDate = Carbon::createFromFormat('Y-m-d', $filters['endDate'])->endOfDay();
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        // Terapkan filter lain jika ada
+        foreach ($filters as $key => $value) {
+            if (!empty($value) && !in_array($key, ['startDate', 'endDate'])) {
+                $query->where($key, 'like', "%{$value}%");
+            }
+        }
+
+        $obats = $query->get();
+
+        $pdf = PDF::loadView('admin.pdf.obat', ['obats' => $obats]);
+        return $pdf->download('laporan_obat.pdf');
     }
 }

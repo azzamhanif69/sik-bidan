@@ -14,7 +14,7 @@ class Pasien extends Model
 
     // Di dalam model Pasien.php
 
-    public function scopeFilter($query, array $filters)
+    public function scopeCari($query, array $filters)
     {
         $query->when($filters['search'] ?? false, function ($query, $search) {
             return $query->where('name', 'like', '%' . $search . '%')

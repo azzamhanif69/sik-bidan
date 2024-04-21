@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\Medis;
 use App\Models\Pasien;
 use App\Models\Application;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Routing\Controller;
+
 
 class AdminPasienController extends Controller
 {
@@ -19,7 +21,7 @@ class AdminPasienController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only('search'); // Ambil filter dari request
-        $pasiens = Pasien::filter($filters)->paginate(10); // Terapkan filter pada query
+        $pasiens = Pasien::Cari($filters)->paginate(10); // Terapkan filter pada query
 
         return view('admin.pasien.index', [
             'app' => Application::all(),
@@ -82,9 +84,17 @@ class AdminPasienController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $pasien = Pasien::findOrFail($id);
+        $rekamMedis = Medis::where('pasien_id', $pasien->id)->paginate(10); // Ambil rekam medis khusus untuk pasien ini
+
+        return view('admin.pasien.show', [
+            'app' => Application::all(),
+            'tittle' => 'Rekam Medis',
+            'pasien' => $pasien,
+            'rekamMedis' => $rekamMedis, // Kirim data rekam medis ke view
+        ]);
     }
 
     /**
@@ -108,34 +118,6 @@ class AdminPasienController extends Controller
         $pasien = Pasien::findOrFail($id);
         $pasien->update($request->all());
         return redirect('/admin/pasien')->with('success', 'Pasien Berhasil Diubah!');
-
-        // $idPatient = decrypt($request->code);
-        // $validatedData = $request->validate([
-        //     'no_rm' => 'required|string|max:8|unique:pasiens',
-        //     'name' => 'required|string|max:255',
-        //     'birth' => 'required',
-        //     'address' => 'required',
-        //     'date_of_birth' => 'required|integer|min:1',
-        //     'gender' => 'required',
-        //     'phone' => 'required|string|max:255'
-        // ]);
-        // Pasien::where('id', $idPatient)->update($validatedData);
-        // return back()->with('success', 'Data pasien berhasil diubah!');
-        // $rules = [
-        //     'name' => 'required|string|max:255',
-        //     'birth' => 'required',
-        //     'address' => 'required',
-        //     'date_of_birth' => 'required|integer|min:1',
-        //     'gender' => 'required',
-        //     'phone' => 'required|string|max:255'
-        // ];
-        // $validatedData = $request->validate($rules);
-        // $validatedData['no_rm'] = auth()->user()->id;
-
-        // Pasien::where('id', $pasien->id)->update($validatedData);
-        // return redirect('/admin/pasien')->with('success', 'Data pasien berhasil diubah!');
-
-
     }
     /**
      * Remove the specified resource from storage.
@@ -149,20 +131,64 @@ class AdminPasienController extends Controller
         Pasien::destroy($idPatient);
         return back()->with('success', 'Pasien berhasil dihapus!');
     }
-    // public function editPatient(Request $request)
-    // {
-    //     $idPatient = decrypt($request->code);
-    //     $validatedData = $request->validate([
-    //         'no_rm' => 'required|string|max:8|unique:pasiens',
-    //         'name' => 'required|string|max:255',
-    //         'birth' => 'required',
-    //         'address' => 'required',
-    //         'date_of_birth' => 'required|integer|min:1',
-    //         'gender' => 'required',
-    //         'phone' => 'required|string|max:255'
-    //     ]);
-    //     Pasien::where('id', $idPatient)->update($validatedData);
-    //     return back()->with('editPatientSuccess', 'Data pasien berhasil diubah!');
-    // }
 
+
+    public function filters(Request $request)
+    {
+        $filters = $request->except(['_token', 'page']); // Menghilangkan token CSRF dan parameter halaman
+        $request->session()->put('pasien_filters', $filters);
+
+        $startDate = $request->startDate; // Asumsi sudah dalam format 'Y-m-d'
+        $endDate = $request->endDate;     // Asumsi sudah dalam format 'Y-m-d'
+
+        // Jika startDate atau endDate tidak tersedia, kembalikan pesan error
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Tanggal awal dan akhir diperlukan.');
+        }
+
+        // Format tanggal sesuai yang dibutuhkan dan query dengan whereBetween
+        $startDate = Carbon::parse($startDate)->startOfDay();  // Mengatur ke awal hari
+        $endDate = Carbon::parse($endDate)->endOfDay();        // Mengatur ke akhir hari
+
+        $pasiens = Pasien::whereBetween('created_at', [$startDate, $endDate])->paginate(10)->withQueryString();
+
+
+        return view('admin.pasien.index', [
+            'app' => Application::all(),
+            'tittle' => 'Data Pasien',
+            'pasiens' => $pasiens,
+        ], compact('pasiens'));
+    }
+
+    public function downloadPDF(Request $request)
+    {
+        // Ambil filter dari sesi
+        $filters = $request->session()->get('pasien_filters', []);
+
+        // Query berdasarkan filter yang disimpan di sesi
+        $query = Pasien::query();
+
+        // Pastikan Anda mengonversi tanggal ke format yang sesuai sebelum digunakan dalam query
+        if (!empty($filters['startDate'])) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $filters['startDate'])->startOfDay();
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        if (!empty($filters['endDate'])) {
+            $endDate = Carbon::createFromFormat('Y-m-d', $filters['endDate'])->endOfDay();
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        // Terapkan filter lain jika ada
+        foreach ($filters as $key => $value) {
+            if (!empty($value) && !in_array($key, ['startDate', 'endDate'])) {
+                $query->where($key, 'like', "%{$value}%");
+            }
+        }
+
+        $pasiens = $query->get();
+
+        $pdf = PDF::loadView('admin.pdf.pasien', ['pasiens' => $pasiens]);
+        return $pdf->download('laporan_pasien.pdf');
+    }
 }

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminMedisController extends Controller
 {
@@ -110,13 +111,19 @@ class AdminMedisController extends Controller
     // }
     public function store(Request $request)
     {
-        $request->validate([
-            'pasien' => 'required',
-            'keluhan' => 'required',
-            'resep.*.id' => 'required',
-            'resep.*.jumlah' => 'required|integer|min:1',
-            'resep.*.aturan' => 'required',
-        ]);
+        $request->validate(
+            [
+                'pasien' => 'required',
+                'keluhan' => 'required',
+                'resep.*.id' => 'required',
+                'resep.*.jumlah' => 'required|integer|min:1',
+                'resep.*.aturan' => 'required',
+            ],
+            [
+                'pasien' => 'Nama Pasien tidak boleh kosong!',
+                'keluhan' => 'Keluhan tidak boleh kosong!',
+            ]
+        );
 
 
         DB::beginTransaction();
@@ -155,15 +162,15 @@ class AdminMedisController extends Controller
      */
     public function show($pasienId)
     {
-        // Temukan pasien berdasarkan $pasienId
-        $pasien = Pasien::find($pasienId);
+        // // Temukan pasien berdasarkan $pasienId
+        // $pasien = Pasien::find($pasienId);
 
-        // Ambil semua rekam medis yang terkait dengan pasien ini
-        $rekamMedis = Medis::where('pasien_id', $pasienId)->with('reseps')->get();
+        // // Ambil semua rekam medis yang terkait dengan pasien ini
+        // $rekamMedis = Medis::where('pasien_id', $pasienId)->with('reseps')->get();
 
-        // Sekarang $rekamMedis berisi semua entri rekam medis dan resep yang terkait
-        // Kirim data ini ke view
-        return view('pasien.show', compact('pasien', 'rekamMedis'));
+        // // Sekarang $rekamMedis berisi semua entri rekam medis dan resep yang terkait
+        // // Kirim data ini ke view
+        // return view('pasien.show', compact('pasien', 'rekamMedis'));
     }
 
     /**
@@ -205,5 +212,60 @@ class AdminMedisController extends Controller
             $prescriptions = Obat::where('nama_obat', 'LIKE', '%' . $request->get('q') . '%')->get();
             return response()->json(['resep' => $prescriptions], 200);
         }
+    }
+    public function filters(Request $request)
+    {
+        $filters = $request->except(['_token', 'page']); // Menghilangkan token CSRF dan parameter halaman
+        $request->session()->put('medis_filters', $filters);
+        $startDate = $request->startDate; // Asumsi sudah dalam format 'Y-m-d'
+        $endDate = $request->endDate;     // Asumsi sudah dalam format 'Y-m-d'
+
+        // Jika startDate atau endDate tidak tersedia, kembalikan pesan error
+        if (!$startDate || !$endDate) {
+            return redirect()->back()->with('error', 'Tanggal awal dan akhir diperlukan.');
+        }
+
+        // Format tanggal sesuai yang dibutuhkan dan query dengan whereBetween
+        $startDate = Carbon::parse($startDate)->startOfDay();  // Mengatur ke awal hari
+        $endDate = Carbon::parse($endDate)->endOfDay();        // Mengatur ke akhir hari
+
+        $rekamMedisList = Medis::whereBetween('created_at', [$startDate, $endDate])->paginate(10)->withQueryString();
+
+        return view('admin.medis.index', [
+            'app' => Application::all(),
+            'tittle' => 'Rekam Medis',
+            'rekamMedisList' =>  $rekamMedisList,
+        ], compact('rekamMedisList'));
+    }
+    public function downloadPDF(Request $request)
+    {
+        // Ambil filter dari sesi
+        $filters = $request->session()->get('medis_filters', []);
+
+        // Query berdasarkan filter yang disimpan di sesi
+        $query = Medis::query();
+
+        // Pastikan Anda mengonversi tanggal ke format yang sesuai sebelum digunakan dalam query
+        if (!empty($filters['startDate'])) {
+            $startDate = Carbon::createFromFormat('Y-m-d', $filters['startDate'])->startOfDay();
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        if (!empty($filters['endDate'])) {
+            $endDate = Carbon::createFromFormat('Y-m-d', $filters['endDate'])->endOfDay();
+            $query->where('created_at', '<=', $endDate);
+        }
+
+        // Terapkan filter lain jika ada
+        foreach ($filters as $key => $value) {
+            if (!empty($value) && !in_array($key, ['startDate', 'endDate'])) {
+                $query->where($key, 'like', "%{$value}%");
+            }
+        }
+
+        $rekamMedisList = $query->get();
+
+        $pdf = PDF::loadView('admin.pdf.medis', ['rekamMedisList' => $rekamMedisList]);
+        return $pdf->download('laporan_rekam_medis.pdf');
     }
 }
