@@ -21,139 +21,150 @@
                 justify-content: end;
             }
         }
+
+        .form-control {
+            width: auto;
+            /* Input tanggal akan mempertahankan lebar berdasarkan kontennya */
+            flex-grow: 2;
+            /* Input tanggal akan tumbuh lebih banyak dari tombol */
+        }
     </style>
 
     <div class="flash-message" data-flash-message="@if (session()->has('success')) {{ session('success') }} @endif">
     </div>
-
-
-    {{-- @if (session('success'))
-        <div class="alert alert success"></div>
-    @endif --}}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item active" aria-current="page">Data Pasien</li>
         </ol>
     </nav>
-
-
     <div class="row">
         <div class="col-md-12 col-lg-12 order-2 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between" style="margin-bottom: -0.7rem;">
                     <div class="justify-content-start d-none d-md-block">
-                        <form action="" method="POST">
+                        <form action="{{ route('pasien.filters') }}" method="POST">
+                            @csrf
                             <div class="d-flex align-items-center">
-
-                                <a href="/admin/pasien/create" type="button" class="btn btn-xs btn-dark fw-bold p-2">
-                                    <i class='bx bx-add-to-queue'></i>&nbsp; Pasien Baru
+                                <a href="/admin/pasien/create" class="btn btn-xs btn-dark fw-bold me-3 p-2">
+                                    <i class='bx bx-add-to-queue'></i> Pasien Baru
                                 </a>
-
-                            </div>
+                                <input class="form-control" name="startDate" type="date"
+                                    value="{{ request('startDate') }}" />
+                                <div class="me-2 ms-2">-</div>
+                                <input class="form-control" name="endDate" type="date"
+                                    value="{{ request('endDate') }}" />
+                                <button type="submit" class="btn btn-xs btn-dark fw-bold ms-2 p-2"><i
+                                        class='bx bx-filter'></i>&nbsp;Filter</button>
                         </form>
-                    </div>
-                    <div class="justify-content-end">
-                        <!-- Search -->
-                        <form action="/admin/pasien" method="GET">
-                            <div class="input-group">
-                                <input type="search" class="form-control" name="search" id="search"
-                                    style="border: 1px solid #d9dee3;" value="{{ request('search') }}"
-                                    placeholder="Cari data pasien..." autocomplete="off" />
-                            </div>
+                        <form action="{{ route('pasien.download_pdf') }}" method="GET">
+                            <input type="hidden" name="startDate" value="{{ request('startDate') }}">
+                            <input type="hidden" name="endDate" value="{{ request('endDate') }}">
+                            <button type="submit" class="btn btn-xs btn-dark fw-bold ms-2 p-2"><i
+                                    class='bx bxs-file-pdf'></i>&nbsp; Download PDF</button>
                         </form>
-                        {{-- <input type="text" id="search" placeholder="Search...">
-                        <ul id="search-results"></ul> --}}
-                        <!-- /Search -->
                     </div>
                 </div>
-
-                <div class="card-body">
-                    <ul class="p-0 m-0">
-                        <div class="table-responsive text-nowrap" style="border-radius: 3px;">
-                            <table class="table table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="text-white">No</th>
-                                        <th class="text-white">No. RM</th>
-                                        <th class="text-white">Nama Lengkap</th>
-                                        <th class="text-white">Alamat</th>
-                                        <th class="text-white">Tanggal Lahir</th>
-                                        <th class="text-white text-center">Umur</th>
-                                        <th class="text-white">Jenis Kelamin</th>
-                                        <th class="text-white">Nomor Telepon</th>
-                                        <th class="text-white text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table-border-bottom-0">
-                                    @foreach ($pasiens as $index => $pasien)
-                                        <tr>
-                                            <td>{{ $index + 1 }} </td>
-                                            <td><span class="badge bg-label-secondary fw-bold">{{ $pasien->no_rm }}</span>
-                                            </td>
-                                            <td>{{ $pasien->name }}</td>
-                                            <td>{{ $pasien->address }}</td>
-                                            <td>
-                                                {{ Carbon\Carbon::parse($pasien->birth)->locale('id')->isoFormat('D MMMM YYYY') }}
-                                            </td>
-                                            <td class="text-center"><span
-                                                    class="badge badge-center bg-dark rounded-pill">{{ $pasien->date_of_birth }}</span>
-                                            </td>
-                                            <td>
-                                                @if ($pasien->gender == 'Laki-laki')
-                                                <span class="badge bg-label-primary fw-bold">Laki-Laki</span>@else<span
-                                                        class="badge fw-bold"
-                                                        style="color: #ff6384 !important; background-color: #ffe5eb !important;">Perempuan</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ $pasien->phone }}</td>
-                                            <td class="text-center">
-                                                <a href="/admin/pasien/{{ $pasien->id }}/edit" type="button"
-                                                    class="btn btn-icon btn-warning btn-sm" data-bs-toggle="tooltip"
-                                                    data-popup="tooltip-custom" data-bs-placement="auto" title="Ubah Pasien"
-                                                    data-code="{{ encrypt($pasien->id) }}"
-                                                    data-name="{{ $pasien->name }}">
-                                                    <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
-                                                </a>
-                                                {{-- <a href="/admin/pasien/{{ $pasien->id }}/edit" class="btn btn-warning"><i
-                                                        class="bi bi-pencil-square"></i></a> --}}
-                                                {{-- <button type="button"
-                                                    class="btn btn-icon btn-warning btn-sm buttonEditPatient"
-                                                    data-bs-toggle="tooltip" data-popup="tooltip-custom"
-                                                    data-bs-placement="auto" title="Edit Data Pasien"
-                                                    data-code="{{ encrypt($pasien->id) }}" data-name="{{ $pasien->name }}"
-                                                    data-address="{{ $pasien->address }}"
-                                                    data-gender="{{ $pasien->gender }}">
-                                                    <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
-                                                </button> --}}
-                                                <button type="button"
-                                                    class="btn btn-icon btn-danger btn-sm buttonDeletePatient"
-                                                    data-bs-toggle="tooltip" data-popup="tooltip-custom"
-                                                    data-bs-placement="auto" title="Hapus Pasien"
-                                                    data-code="{{ encrypt($pasien->id) }}" data-name="{{ $pasien->name }}"
-                                                    id="buttonDeletePatient">
-                                                    <span class="tf-icons bx bx-trash" style="font-size: 14px;"></span>
-                                                </button>
-
-                                            </td>
-
-                                        </tr>
-                                    @endforeach
-                                    @if ($pasiens->isEmpty())
-                                        <tr>
-                                            <td colspan="100" class="text-center">Tidak ada data Pasien!</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
+                <div class="justify-content-end">
+                    <!-- Search -->
+                    <form action="/admin/pasien" method="GET">
+                        <div class="input-group">
+                            <input type="search" class="form-control" name="search" id="search"
+                                style="border: 1px solid #d9dee3;" value="{{ request('search') }}"
+                                placeholder="Cari data pasien..." autocomplete="off" />
                         </div>
-                    </ul>
-                    @if (!$pasiens->isEmpty())
-                        <div class="mt-3 pagination-mobile">{{ $pasiens->withQueryString()->onEachSide(1)->links() }}
-                        </div>
-                    @endif
+                    </form>
+                    {{-- <input type="text" id="search" placeholder="Search...">
+                        <ul id="search-results"></ul> --}}
+                    <!-- /Search -->
                 </div>
             </div>
+
+            <div class="card-body">
+                <ul class="p-0 m-0">
+                    <div class="table-responsive text-nowrap" style="border-radius: 3px;">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-white">No</th>
+                                    <th class="text-white">No. RM</th>
+                                    <th class="text-white">Nama Lengkap</th>
+                                    <th class="text-white">Alamat</th>
+                                    <th class="text-white">Tanggal Lahir</th>
+                                    <th class="text-white">Ditambahkan Pada</th>
+                                    <th class="text-white text-center">Umur</th>
+                                    <th class="text-white">Jenis Kelamin</th>
+                                    <th class="text-white">Nomor Telepon</th>
+                                    <th class="text-white text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-border-bottom-0">
+                                @foreach ($pasiens as $index => $pasien)
+                                    <tr>
+                                        <td>{{ $index + 1 }} </td>
+                                        <td><span class="badge bg-label-secondary fw-bold">{{ $pasien->no_rm }}</span>
+                                        </td>
+                                        <td>
+                                            {{ $pasien->name }}
+                                        </td>
+                                        <td>{{ $pasien->address }}</td>
+                                        <td>
+                                            {{ Carbon\Carbon::parse($pasien->birth)->locale('id')->isoFormat('D MMMM YYYY') }}
+                                        </td>
+                                        <td>{{ $pasien->created_at->locale('id')->isoFormat('D MMMM YYYY | H:mm') }}
+                                        </td>
+                                        <td class="text-center"><span
+                                                class="badge badge-center bg-dark rounded-pill">{{ $pasien->date_of_birth }}</span>
+                                        </td>
+                                        <td>
+                                            @if ($pasien->gender == 'Laki-laki')
+                                            <span class="badge bg-label-primary fw-bold">Laki-Laki</span>@else<span
+                                                    class="badge fw-bold"
+                                                    style="color: #ff6384 !important; background-color: #ffe5eb !important;">Perempuan</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $pasien->phone }}</td>
+                                        <td class="text-center">
+                                            <a href="/admin/pasien/{{ $pasien->id }}" type="button"
+                                                class="btn btn-icon btn-secondary btn-sm" data-bs-toggle="tooltip"
+                                                data-popup="tooltip-custom" data-bs-placement="auto" title="Rekam Medis"
+                                                data-code="{{ encrypt($pasien->id) }}" data-name="{{ $pasien->name }}">
+                                                <span class="tf-icons bx bx-book-alt" style="font-size: 15px;"></span>
+                                            </a>
+                                            <a href="/admin/pasien/{{ $pasien->id }}/edit" type="button"
+                                                class="btn btn-icon btn-warning btn-sm" data-bs-toggle="tooltip"
+                                                data-popup="tooltip-custom" data-bs-placement="auto" title="Ubah Pasien"
+                                                data-code="{{ encrypt($pasien->id) }}" data-name="{{ $pasien->name }}">
+                                                <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
+                                            </a>
+                                            <button type="button"
+                                                class="btn btn-icon btn-danger btn-sm buttonDeletePatient"
+                                                data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                data-bs-placement="auto" title="Hapus Pasien"
+                                                data-code="{{ encrypt($pasien->id) }}" data-name="{{ $pasien->name }}"
+                                                id="buttonDeletePatient">
+                                                <span class="tf-icons bx bx-trash" style="font-size: 14px;"></span>
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+                                @endforeach
+                                @if ($pasiens->isEmpty())
+                                    <tr>
+                                        <td colspan="100" class="text-center">Tidak ada data Pasien!</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </ul>
+                @if (!$pasiens->isEmpty())
+                    <div class="mt-3 pagination-mobile">{{ $pasiens->withQueryString()->onEachSide(1)->links() }}
+                    </div>
+                @endif
+            </div>
         </div>
+    </div>
     </div>
 
     <!-- Modal Delete patient -->
@@ -300,23 +311,12 @@
             </form>
         </div>
     </div>
- --}}
+--}}
 
 
     @include('sweetalert::alert')
 
     <script>
-        //hitung umur
-        document.getElementById('tanggalLahir').addEventListener('change', function() {
-            var tanggalLahir = new Date(this.value);
-            var today = new Date();
-            var age = today.getFullYear() - tanggalLahir.getFullYear();
-            var monthDiff = today.getMonth() - tanggalLahir.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < tanggalLahir.getDate())) {
-                age--;
-            }
-            document.getElementById('date_of_birth').value = age;
-        });
         //deletepasien
         $(".buttonDeletePatient").on("click", function() {
             const code = $(this).data("code");
@@ -327,6 +327,30 @@
             );
             $("#deletePatient").modal("show");
         });
+
+        ///filtering
+        // $("#dateStart").on("change", function() {
+        //     const data = $(this).val();
+        //     const enddata = $("#endDate").val();
+        //     if (enddata) {
+        //         window.location.href =
+        //             "/admin/pasien/filter?startDate=" + data + "&endDate=" + enddata;
+        //     } else {
+        //         window.location.href = "/admin/pasien/filter?startDate=" + data;
+        //     }
+        // });
+
+        // $("#endDate").on("change", function() {
+        //     const data = $("#dateStart").val();
+        //     const enddata = $(this).val();
+        //     if (data) {
+        //         window.location.href =
+        //             "/admin/pasien/filter?startDate=" + data + "&endDate=" + enddata;
+        //     } else {
+        //         $(this).val("");
+        //         setMessage("Masukkan tanggal awal dulu!", "warning");
+        //     }
+        // });
     </script>
 @section('script')
     <script src="{{ asset('assets/js/patients.js') }}"></script>

@@ -37,6 +37,13 @@
         .select2-container--bootstrap .select2-dropdown {
             border-color: #ced4da;
         }
+
+        .form-control {
+            width: auto;
+            /* Input tanggal akan mempertahankan lebar berdasarkan kontennya */
+            flex-grow: 2;
+            /* Input tanggal akan tumbuh lebih banyak dari tombol */
+        }
     </style>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -51,102 +58,107 @@
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between" style="margin-bottom: -0.7rem;">
                     <div class="justify-content-start d-none d-md-block">
-                        <form action="" method="POST">
+                        <form action="{{ route('obat.filters') }}" method="POST">
+                            @csrf
                             <div class="d-flex align-items-center">
-                                <div class="row">
-                                    <div class="col-auto">
-                                        <a href="/admin/obat/create" type="button" class="btn btn-xs btn-dark fw-bold p-2">
-                                            <i class='bx bx-add-to-queue'></i>&nbsp; Obat Baru
-                                        </a>
-                                    </div>
-                                    <div class="col-auto">
-                                        <button type="button" class="btn btn-xs btn-dark fw-bold p-2" data-toggle="modal"
-                                            data-target="#tambahStokModal">
-                                            <i class='bx bx-plus-medical'></i>&nbsp; Tambah Stok
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                <a href="/admin/obat/create" class="btn btn-xs btn-dark fw-bold me-3 p-2">
+                                    <i class='bx bx-add-to-queue'></i> obat Baru
+                                </a>
+                                <button type="button" class="btn btn-xs btn-dark fw-bold p-2 me-3" data-toggle="modal"
+                                    data-target="#tambahStokModal">
+                                    <i class='bx bx-plus-medical'></i>&nbsp; Tambah Stok
+                                </button>
+                                <input class="form-control" name="startDate" type="date" />
+                                <div class="me-2 ms-2">-</div>
+                                <input class="form-control" name="endDate" type="date" />
+                                <button type="submit" class="btn btn-xs btn-dark fw-bold ms-2 p-2"><i
+                                        class='bx bx-filter'></i>&nbsp; Filter</button>
                         </form>
-                    </div>
-                    <div class="justify-content-end">
-                        <!-- Search -->
-                        <form action="/admin/obat" method="GET">
-                            <div class="input-group">
-                                <input type="search" class="form-control" name="search" id="search"
-                                    style="border: 1px solid #d9dee3;" value="{{ request('search') }}"
-                                    placeholder="Cari data obat..." autocomplete="off" />
-                            </div>
+                        <form action="{{ route('obat.download_pdf') }}" method="GET">
+                            <input type="hidden" name="startDate" value="{{ request('startDate') }}">
+                            <input type="hidden" name="endDate" value="{{ request('endDate') }}">
+                            <button type="submit" class="btn btn-xs btn-dark fw-bold ms-2 p-2"><i
+                                    class='bx bxs-file-pdf'></i>&nbsp; Download PDF</button>
                         </form>
                     </div>
                 </div>
-
-                <div class="card-body">
-                    <ul class="p-0 m-0">
-                        <div class="table-responsive text-nowrap" style="border-radius: 3px;">
-                            <table class="table table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="text-white">No</th>
-                                        <th class="text-white">Nama Obat</th>
-                                        <th class="text-white">Sediaan</th>
-                                        <th class="text-white">Dosis</th>
-                                        <th class="text-white">Satuan</th>
-                                        <th class="text-white text-center">Stok</th>
-                                        <th class="text-white">Harga</th>
-                                        <th class="text-white text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table-border-bottom-0">
-                                    @foreach ($obats as $index => $obat)
-                                        <tr>
-                                            <td>{{ $index + 1 }} </td>
-                                            <td>{{ $obat->nama_obat }}</td>
-                                            <td>{{ $obat->sediaan }}</td>
-                                            <td class="">
-                                                <span class="badge bg-label-secondary fw-bold">{{ $obat->dosis }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $obat->satuan }}</td>
-                                            <td class="text-center"> <span
-                                                    class="badge badge-center bg-dark rounded-pill">{{ $obat->stok }}</span>
-                                            </td>
-                                            <td>{{ $obat->harga }}</td>
-                                            <td class="text-center">
-                                                <a href="/admin/obat/{{ $obat->id }}/edit" type="button"
-                                                    class="btn btn-icon btn-warning btn-sm" data-bs-toggle="tooltip"
-                                                    data-popup="tooltip-custom" data-bs-placement="auto" title="Ubah Obat">
-                                                    <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
-                                                </a>
-                                                <button type="button"
-                                                    class="btn btn-icon btn-danger btn-sm buttonDeleteObat"
-                                                    data-bs-toggle="tooltip" data-popup="tooltip-custom"
-                                                    data-bs-placement="auto" title="Hapus Obat"
-                                                    data-code="{{ encrypt($obat->id) }}"
-                                                    data-nama_obat="{{ $obat->nama_obat }}" id="buttonDeleteObat">
-                                                    <span class="tf-icons bx bx-trash" style="font-size: 14px;"></span>
-                                                </button>
-
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                    @if ($obats->isEmpty())
-                                        <tr>
-                                            <td colspan="100" class="text-center">Tidak ada data Obat!</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
-                            </table>
+                <div class="justify-content-end">
+                    <!-- Search -->
+                    <form action="/admin/obat" method="GET">
+                        <div class="input-group">
+                            <input type="search" class="form-control" name="search" id="search"
+                                style="border: 1px solid #d9dee3;" value="{{ request('search') }}"
+                                placeholder="Cari data obat..." autocomplete="off" />
                         </div>
-                    </ul>
-                    @if (!$obats->isEmpty())
-                        <div class="mt-3 pagination-mobile">{{ $obats->withQueryString()->onEachSide(1)->links() }}
-                        </div>
-                    @endif
-
+                    </form>
                 </div>
             </div>
+
+            <div class="card-body">
+                <ul class="p-0 m-0">
+                    <div class="table-responsive text-nowrap" style="border-radius: 3px;">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-white">No</th>
+                                    <th class="text-white">Nama Obat</th>
+                                    <th class="text-white">Sediaan</th>
+                                    <th class="text-white">Dosis</th>
+                                    <th class="text-white">Satuan</th>
+                                    <th class="text-white text-center">Stok</th>
+                                    <th class="text-white">Harga</th>
+                                    <th class="text-white text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-border-bottom-0">
+                                @foreach ($obats as $index => $obat)
+                                    <tr>
+                                        <td>{{ $index + 1 }} </td>
+                                        <td>{{ $obat->nama_obat }}</td>
+                                        <td>{{ $obat->sediaan }}</td>
+                                        <td class="">
+                                            <span class="badge bg-label-secondary fw-bold">{{ $obat->dosis }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $obat->satuan }}</td>
+                                        <td class="text-center"> <span
+                                                class="badge badge-center bg-dark rounded-pill">{{ $obat->stok }}</span>
+                                        </td>
+                                        <td>{{ $obat->harga }}</td>
+                                        <td class="text-center">
+                                            <a href="/admin/obat/{{ $obat->id }}/edit" type="button"
+                                                class="btn btn-icon btn-warning btn-sm" data-bs-toggle="tooltip"
+                                                data-popup="tooltip-custom" data-bs-placement="auto" title="Ubah Obat">
+                                                <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
+                                            </a>
+                                            <button type="button" class="btn btn-icon btn-danger btn-sm buttonDeleteObat"
+                                                data-bs-toggle="tooltip" data-popup="tooltip-custom"
+                                                data-bs-placement="auto" title="Hapus Obat"
+                                                data-code="{{ encrypt($obat->id) }}"
+                                                data-nama_obat="{{ $obat->nama_obat }}" id="buttonDeleteObat">
+                                                <span class="tf-icons bx bx-trash" style="font-size: 14px;"></span>
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                @endforeach
+                                @if ($obats->isEmpty())
+                                    <tr>
+                                        <td colspan="100" class="text-center">Tidak ada data Obat!</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </ul>
+                @if (!$obats->isEmpty())
+                    <div class="mt-3 pagination-mobile">{{ $obats->withQueryString()->onEachSide(1)->links() }}
+                    </div>
+                @endif
+
+            </div>
         </div>
+    </div>
     </div>
     <!-- Modal Delete obat -->
     <div class="modal fade" id="deleteObat" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">

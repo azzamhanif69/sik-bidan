@@ -151,6 +151,7 @@
             </div>
         </div>
     </div>
+
     <script type="text/javascript">
         document.getElementById('tanggalLahir').addEventListener('change', function() {
             var tanggalLahir = new Date(this.value);
@@ -164,4 +165,5 @@
             document.getElementById('hasilUmur').value = age;
         });
     </script>
+    @include('sweetalert::alert')
 @endsection

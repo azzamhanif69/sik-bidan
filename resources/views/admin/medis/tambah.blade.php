@@ -23,9 +23,7 @@
             color: red;
         }
 
-        /* .text-right {
-                                                                                                                                                                            text-align: right;
-                                                                                                                                                                        } */
+
 
         .select2-container--bootstrap .select2-selection--single {
             padding: 0.375rem 0.75rem;

@@ -138,6 +138,8 @@
             </div>
         </div>
     </div>
+    @include('sweetalert::alert')
+
     <script>
         var rupiahInput = document.getElementById("rupiahInput");
         rupiahInput.addEventListener("keyup", function(e) {

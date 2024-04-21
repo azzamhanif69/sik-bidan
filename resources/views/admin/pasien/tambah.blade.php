@@ -161,4 +161,5 @@
             document.getElementById('hasilUmur').value = age;
         });
     </script>
+    @include('sweetalert::alert')
 @endsection
