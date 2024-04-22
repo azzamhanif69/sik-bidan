@@ -18,7 +18,7 @@ class AdminObatController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only('search'); // Ambil filter dari request
-        $obats = Obat::filter($filters)->paginate(10); // Terapkan filter pada query
+        $obats = Obat::filter($filters)->orderByDesc('created_at')->paginate(10); // Terapkan filter pada query
 
         return view('admin.obat.index', [
             'app' => Application::all(),

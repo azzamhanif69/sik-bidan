@@ -127,12 +127,6 @@
                                                 data-popup="tooltip-custom" data-bs-placement="auto" title="Edit Medis">
                                                 <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
                                             </a>
-                                            <button type="button" class="btn btn-icon btn-danger btn-sm buttonDeleteMedis"
-                                                data-bs-toggle="tooltip" data-popup="tooltip-custom"
-                                                data-bs-placement="auto" title="Hapus Medis" id="buttonDeleteMedis">
-                                                <span class="tf-icons bx bx-trash" style="font-size: 14px;"></span>
-                                            </button>
-
                                         </td>
                                     </tr>
                                 @endforeach

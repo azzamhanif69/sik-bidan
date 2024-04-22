@@ -21,7 +21,7 @@ class AdminPasienController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only('search'); // Ambil filter dari request
-        $pasiens = Pasien::Cari($filters)->paginate(10); // Terapkan filter pada query
+        $pasiens = Pasien::Cari($filters)->orderByDesc('created_at')->paginate(10); // Terapkan filter pada query
 
         return view('admin.pasien.index', [
             'app' => Application::all(),

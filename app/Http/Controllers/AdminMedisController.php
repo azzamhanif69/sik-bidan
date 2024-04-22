@@ -32,7 +32,8 @@ class AdminMedisController extends Controller
 
 
         $rekamMedisList = Medis::with('pasien')
-            ->filter($request->search) // Gunakan scope untuk filter pencarian
+            ->filter($request->search)
+            ->orderByDesc('created_at') // Gunakan scope untuk filter pencarian
             ->paginate(10);
         return view('admin.medis.index', [
             'app' => Application::all(),
@@ -178,16 +179,136 @@ class AdminMedisController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        // $medis = Medis::with('pasien', 'obat')->get();
+        // return view('admin.medis.ubah', [
+        //     'app' => Application::all(),
+        //     'tittle' => 'Ubah Rekan Medis',
+        //     'medis' => $medis,
+        // ], compact('medis'));
+
+        $medis = Medis::with(
+            'reseps.obat',
+        )->findOrFail($id);
+
+        // Ambil data lain yang dibutuhkan
+        return view('admin.medis.ubah', [
+            'app' => Application::all(),
+            'tittle' => 'Ubah Rekam Medis',
+            'medis' => $medis,
+            'pasien' => Pasien::all(),
+            'obats' => Obat::all()
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    // public function update(Request $request, $medisId)
+    // {
+    //     $request->validate(
+    //         [
+    //             'pasien' => 'required',
+    //             'keluhan' => 'required',
+    //             'resep.*.id' => 'required',
+    //             'resep.*.jumlah' => 'required|integer|min:1',
+    //             'resep.*.aturan' => 'required',
+    //         ],
+    //         [
+    //             'pasien.required' => 'Nama Pasien tidak boleh kosong!',
+    //             'keluhan.required' => 'Keluhan tidak boleh kosong!',
+    //         ]
+    //     );
+
+    //     DB::beginTransaction();
+    //     try {
+    //         $medis = Medis::findOrFail($medisId);
+    //         $medis->update([
+    //             'pasien_id' => $request->pasien,
+    //             'keluhan' => $request->keluhan,
+    //         ]);
+
+    //         // Sync resep
+    //         $currentResepIds = $medis->reseps->pluck('obat_id')->all();
+    //         $newResepIds = collect($request->resep)->pluck('id')->all();
+    //         $toDelete = array_diff($currentResepIds, $newResepIds);
+    //         $toAddOrUpdate = $request->resep;
+
+    //         // Menghapus resep yang tidak ada lagi
+    //         foreach ($toDelete as $id) {
+    //             $medis->reseps()->where('obat_id', $id)->delete();
+    //         }
+
+    //         // Menambah atau memperbarui resep yang ada
+    //         foreach ($toAddOrUpdate as $dataResep) {
+    //             $obat = Obat::findOrFail($dataResep['id']);
+    //             $jumlahLama = $medis->reseps()->where('obat_id', $dataResep['id'])->first()->jumlah ?? 0;
+    //             if ($obat->stok + $jumlahLama < $dataResep['jumlah']) {
+    //                 DB::rollback();
+    //                 return back()->withInput()->withErrors('Stok ' . $obat->nama_obat . ' tidak mencukupi');
+    //             }
+
+    //             $medis->reseps()->updateOrCreate(
+    //                 ['obat_id' => $dataResep['id']],
+    //                 ['jumlah' => $dataResep['jumlah'], 'aturan' => $dataResep['aturan']]
+    //             );
+
+    //             $obat->increment('stok', $jumlahLama);
+    //             $obat->decrement('stok', $dataResep['jumlah']);
+    //         }
+
+    //         DB::commit();
+    //         return redirect('/admin/medis')->with('success', 'Data rekam medis telah diperbarui.');
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return back()->withErrors('Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+    //     }
+    // }
+    public function update(Request $request, $medisId)
     {
-        //
+        $request->validate([
+            'pasien' => 'required',
+            'keluhan' => 'required',
+            'resep.*.id' => 'required',
+            'resep.*.jumlah' => 'required|integer|min:1',
+            'resep.*.aturan' => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $medis = Medis::findOrFail($medisId);
+            $medis->update([
+                'pasien_id' => $request->pasien,
+                'keluhan' => $request->keluhan,
+            ]);
+
+            // Menangani update stok obat
+            $oldReseps = $medis->reseps;
+            foreach ($oldReseps as $oldResep) {
+                $oldResep->obat->increment('stok', $oldResep->jumlah);
+            }
+
+            $medis->reseps()->delete(); // Hapus semua resep lama
+
+            foreach ($request->resep as $dataResep) {
+                $obat = Obat::findOrFail($dataResep['id']);
+                $medis->reseps()->create([
+                    'obat_id' => $dataResep['id'],
+                    'jumlah' => $dataResep['jumlah'],
+                    'aturan' => $dataResep['aturan'],
+                ]);
+
+                $obat->decrement('stok', $dataResep['jumlah']);
+            }
+
+            DB::commit();
+            return redirect('/admin/medis')->with('success', 'Data rekam medis telah diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors('Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
     }
+
+
 
     /**
      * Remove the specified resource from storage.

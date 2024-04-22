@@ -23,8 +23,6 @@
             color: red;
         }
 
-
-
         .select2-container--bootstrap .select2-selection--single {
             padding: 0.375rem 0.75rem;
             height: calc(2.25rem + 2px);
@@ -43,7 +41,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/admin/medis">Rekam Medis</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Baru</li>
+            <li class="breadcrumb-item active" aria-current="page">Ubah</li>
         </ol>
     </nav>
     <div class="flash-message" data-flash-message="@if (session()->has('success')) {{ session('success') }} @endif">
@@ -54,16 +52,18 @@
                 <a href="/admin/medis" class="btn btn-outline-danger"><i class='bx bx-left-arrow-alt'></i>&nbsp;Kembali</a>
             </div>
             <div class="card-body">
-                <form method="POST" action="/admin/medis">
+                <form method="POST" action="/admin/medis/{{ $medis->id }}">
+                    @method('PUT')
                     @csrf
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label required-label" for="pasien">Pasien</label>
                         <div class="col-sm-10">
                             <select name="pasien" id="pasien" class="form-control @error('pasien') is-invalid @enderror"
-                                aria-label="pasien">
-                                <option></option>
+                                aria-label="Pasien">
+                                <option value="">Pilih Pasien</option>
                                 @foreach ($pasien as $p)
-                                    <option value="{{ $p->id }}" @if (old('pasien') == $p->id) selected @endif>
+                                    <option value="{{ $p->id }}"
+                                        {{ old('pasien', $medis->pasien->id) == $p->id ? 'selected' : '' }}>
                                         {{ $p->no_rm . ' | ' . $p->name }}
                                     </option>
                                 @endforeach
@@ -75,12 +75,13 @@
                             @enderror
                         </div>
                     </div>
+
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label required-label" for="keluhan">Keluhan</label>
                         <div class="col-sm-10">
                             <input type="text" name="keluhan" id="keluhan"
                                 class="form-control @error('keluhan') is-invalid @enderror" aria-label="keluhan"
-                                value="{{ old('keluhan') }}" placeholder="Masukkan Keluhan">
+                                value="{{ old('keluhan', $medis->keluhan) }}" placeholder="Masukkan Keluhan">
                             @error('keluhan')
                                 <div class="invalid-feedback">
                                     {{ $message }}
@@ -89,19 +90,19 @@
                         </div>
                     </div>
 
+
                     <div id="multiInput">
                         <div class="inputSet">
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label required-label" for="resep">Resep</label>
                                 <div class="col-sm-4">
                                     <select name="resep[]" id="resep"
-                                        class="form-control select2 @error('resep') is-invalid @enderror"
-                                        aria-label="resep">
-                                        <option></option>
-                                        @foreach ($resep as $r)
-                                            <option value="{{ $r->id }}"
-                                                @if (old('resep') == $r->id) selected @endif>
-                                                {{ $r->nama_obat . ' ' . $r->sediaan . ' ' . $r->dosis . ' ' . $r->satuan }}
+                                        class="form-control @error('resep') is-invalid @enderror">
+                                        <option value="">Pilih satu</option>
+                                        @foreach ($obats as $obat)
+                                            <option value="{{ $obat->id }}"
+                                                @if (old('resep') == $obat->id) selected @endif>
+                                                {{ $obat->nama_obat . ' ' . $obat->sediaan . ' ' . $obat->dosis . ' ' . $obat->satuan }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -114,7 +115,6 @@
                                 <div class="col-md-2 mb-1 d-flex align-items-end">
                                     <a href="javascript:;" onclick="addresep()" type="button" name="addresep"
                                         id="addresep" class="btn btn-primary">Tambah</a>
-                                    {{-- <button type="button" class="btn btn-primary addInput">+</button> --}}
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-12 mb-3 mb-sm-0">
@@ -123,48 +123,22 @@
                                     </div>
                                 </div>
                             </div>
-                            {{-- <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label required-label" for="aturan">Aturan</label>
-                                <div class="col-sm-4">
-                                    <input type="text" name="aturan[]" id="aturan"
-                                        class="form-control @error('aturan') is-invalid @enderror" aria-label="aturan"
-                                        value="{{ old('aturan[]') }}" placeholder="Masukkan Aturan Pakai">
-                                    @error('aturan')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label required-label" for="Qty">Qty</label>
-                                <div class="col-sm-1">
-                                    <input type="number" name="jumlah[]" id="jumlah"
-                                        class="form-control @error('jumlah') is-invalid @enderror" aria-label="jumlah"
-                                        value="{{ old('jumlah[]') }}" placeholder="Qty">
-                                    @error('jumlah')
-                                        <div class="invalid-feedback">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div> --}}
                         </div>
                     </div>
                     <div class="row justify-content-end">
                         <div class="col-sm-10">
-                            <button type="submit" class="btn btn-primary">Simpan</button>
+                            <button type="submit" class="btn btn-warning">Ubah</button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    {{-- @push('script') --}}
     <script type="text/javascript">
         var i = 0;
-        var a = 0;
-
+        var f = 0;
+        var existingReseps = @json($medis->reseps);
+        var a = existingReseps.length;
         //perselect2 duniawi
         $(document).ready(function() {
             // Inisialisasi Select2 untuk pencarian pasien
@@ -245,21 +219,24 @@
         });
 
 
+        // Fungsi untuk menambahkan resep baru
+
+
         function addresep() {
             var res = $("#resep option:selected").html();
             var resid = $("#resep").val();
             if (resid !== null && resid !== "") {
                 var newTableRow = `
         <div class="row mb-3">
-            <div class="col-sm-2"><input type="hidden" name="resep[${a}][id]" value="${resid}" class="form-control" readonly></div>
+            <div class="col-sm-2"><input type="hidden" name="resep[${f}][id]" value="${resid}" class="form-control" readonly></div>
             <div class="col-sm-6">
-                <input type="text" name="resep[${a}][nama_obat]" value="${res}" class="form-control text-right" readonly>
+                <input type="text" name="resep[${f}][nama_obat]" value="${res}" class="form-control text-right" readonly>
             </div>
             <div class="col-sm-1">
-                <input type="number" name="resep[${a}][jumlah]" placeholder="Qty" class="form-control" required>
+                <input type="number" name="resep[${f}][jumlah]" placeholder="Qty" class="form-control" required>
             </div>
             <div class="col-sm-2">
-                <input type="text" name="resep[${a}][aturan]" placeholder="Aturan pakai" class="form-control" required>
+                <input type="text" name="resep[${f}][aturan]" placeholder="Aturan pakai" class="form-control" required>
             </div>
             <div class="col-sm-1 d-flex align-items-center">
                 <button type="button" class="btn btn-danger remove-res">Hapus</button>
@@ -280,7 +257,40 @@
         $(document).on('click', '.remove-res', function() {
             $(this).closest('.row').remove();
         });
+
+        // Fungsi untuk memuat resep yang sudah ada
+        function loadExistingReseps() {
+            existingReseps.forEach(function(resep, index) {
+                var resepHTML = `
+                <div class="row mb-3">
+                    <div class="col-sm-2"><input type="hidden" name="resep[${index}][id]" value="${resep.obat_id}" class="form-control" readonly></div>
+                    <div class="col-sm-6">
+                        <input type="text" name="resep[${index}][nama_obat]" value="${resep.obat.nama_obat}" class="form-control text-right" readonly>
+                    </div>
+                    <div class="col-sm-1">
+                        <input type="number" name="resep[${index}][jumlah]" value="${resep.jumlah}" class="form-control" required>
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" name="resep[${index}][aturan]" value="${resep.aturan}" class="form-control" required>
+                    </div>
+                    <div class="col-sm-1 d-flex align-items-center">
+                        <button type="button" class="btn btn-danger remove-res">Hapus</button>
+                    </div>
+                </div>
+            `;
+                $("#reseps").append(resepHTML);
+            });
+        }
+
+        // Panggil fungsi ketika dokumen siap
+        $(document).ready(function() {
+            loadExistingReseps();
+        });
+
+        // Event handler untuk menghapus resep
+        $(document).on('click', '.remove-res', function() {
+            $(this).closest('.row').remove();
+        });
     </script>
-    {{-- @endpush --}}
     @include('sweetalert::alert')
 @endsection

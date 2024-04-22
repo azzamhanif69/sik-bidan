@@ -102,6 +102,7 @@
                                     <th class="text-white">TANGGAL PERIKSA</th>
                                     <th class="text-white">KELUHAN UTAMA</th>
                                     <th class="text-white">TERAPI</th>
+                                    <th class="text-white text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
@@ -127,6 +128,13 @@
                                                     <br>
                                                 @endif
                                             @endforeach
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/admin/medis/{{ $medis->id }}/edit" type="button"
+                                                class="btn btn-icon btn-warning btn-sm" data-bs-toggle="tooltip"
+                                                data-popup="tooltip-custom" data-bs-placement="auto" title="Edit Medis">
+                                                <span class="tf-icons bx bx-edit" style="font-size: 15px;"></span>
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
