@@ -78,10 +78,33 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label required-label" for="keluhan">Keluhan</label>
                         <div class="col-sm-10">
-                            <input type="text" name="keluhan" id="keluhan"
-                                class="form-control @error('keluhan') is-invalid @enderror" aria-label="keluhan"
-                                value="{{ old('keluhan') }}" placeholder="Masukkan Keluhan">
+                            <textarea name="keluhan" id="keluhan" class="form-control @error('keluhan') is-invalid @enderror" aria-label="keluhan"
+                                placeholder="Masukkan Keluhan">{{ old('keluhan') }}</textarea>
                             @error('keluhan')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label required-label" for="pemeriksaan">Hasil Pemeriksaan</label>
+                        <div class="col-sm-10">
+                            <textarea name="pemeriksaan" id="pemeriksaan" class="form-control @error('pemeriksaan') is-invalid @enderror"
+                                aria-label="pemeriksaan" placeholder="Masukkan Hasil Pemeriksaan">{{ old('pemeriksaan') }}</textarea>
+                            @error('pemeriksaan')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label required-label" for="kesimpulan">Kesimpulan</label>
+                        <div class="col-sm-10">
+                            <textarea name="kesimpulan" id="kesimpulan" class="form-control @error('kesimpulan') is-invalid @enderror"
+                                aria-label="kesimpulan" placeholder="Masukkan  Kesimpulan">{{ old('kesimpulan') }}</textarea>
+                            @error('kesimpulan')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>

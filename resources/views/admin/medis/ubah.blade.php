@@ -79,10 +79,33 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label required-label" for="keluhan">Keluhan</label>
                         <div class="col-sm-10">
-                            <input type="text" name="keluhan" id="keluhan"
-                                class="form-control @error('keluhan') is-invalid @enderror" aria-label="keluhan"
-                                value="{{ old('keluhan', $medis->keluhan) }}" placeholder="Masukkan Keluhan">
+                            <textarea name="keluhan" id="keluhan" class="form-control @error('keluhan') is-invalid @enderror" aria-label="keluhan"
+                                placeholder="Masukkan Keluhan">{{ old('keluhan', $medis->keluhan) }}</textarea>
                             @error('keluhan')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label required-label" for="pemeriksaan">Hasil Pemeriksaan</label>
+                        <div class="col-sm-10">
+                            <textarea name="pemeriksaan" id="pemeriksaan" class="form-control @error('pemeriksaan') is-invalid @enderror"
+                                aria-label="pemeriksaan" placeholder="Masukkan Hasil Pemeriksaan">{{ old('pemeriksaan', $medis->pemeriksaan) }}</textarea>
+                            @error('pemeriksaan')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label required-label" for="kesimpulan">Kesimpulan</label>
+                        <div class="col-sm-10">
+                            <textarea name="kesimpulan" id="kesimpulan" class="form-control @error('kesimpulan') is-invalid @enderror"
+                                aria-label="kesimpulan" placeholder="Masukkan Kesimpulan">{{ old('kesimpulan', $medis->kesimpulan) }}</textarea>
+                            @error('kesimpulan')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -226,22 +249,25 @@
             var res = $("#resep option:selected").html();
             var resid = $("#resep").val();
             if (resid !== null && resid !== "") {
+                // Set f to the current number of .row elements in the container
+                f = $('#reseps .row').length; // This counts how many resep rows are already rendered on the page
+
                 var newTableRow = `
-        <div class="row mb-3">
-            <div class="col-sm-2"><input type="hidden" name="resep[${f}][id]" value="${resid}" class="form-control" readonly></div>
-            <div class="col-sm-6">
-                <input type="text" name="resep[${f}][nama_obat]" value="${res}" class="form-control text-right" readonly>
+            <div class="row mb-3">
+                <div class="col-sm-2"><input type="hidden" name="resep[${f}][id]" value="${resid}" class="form-control" readonly></div>
+                <div class="col-sm-6">
+                    <input type="text" name="resep[${f}][nama_obat]" value="${res}" class="form-control text-right" readonly>
+                </div>
+                <div class="col-sm-1">
+                    <input type="number" name="resep[${f}][jumlah]" placeholder="Qty" class="form-control" required>
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" name="resep[${f}][aturan]" placeholder="Aturan pakai" class="form-control" required>
+                </div>
+                <div class="col-sm-1 d-flex align-items-center">
+                    <button type="button" class="btn btn-danger remove-res">Hapus</button>
+                </div>
             </div>
-            <div class="col-sm-1">
-                <input type="number" name="resep[${f}][jumlah]" placeholder="Qty" class="form-control" required>
-            </div>
-            <div class="col-sm-2">
-                <input type="text" name="resep[${f}][aturan]" placeholder="Aturan pakai" class="form-control" required>
-            </div>
-            <div class="col-sm-1 d-flex align-items-center">
-                <button type="button" class="btn btn-danger remove-res">Hapus</button>
-            </div>
-        </div>
         `;
                 $("#reseps").append(newTableRow);
                 $("#resep").val(null).trigger('change');
@@ -256,7 +282,21 @@
         }
         $(document).on('click', '.remove-res', function() {
             $(this).closest('.row').remove();
+            updateIndexes();
         });
+
+        function updateIndexes() {
+            $('#reseps .row').each(function(index) {
+                $(this).find('input, select').each(function() {
+                    var name = $(this).attr('name');
+                    if (name) {
+                        name = name.replace(/\[\d+\]/, '[' + index +
+                            ']'); // Replace the index with the new one
+                        $(this).attr('name', name);
+                    }
+                });
+            });
+        }
 
         // Fungsi untuk memuat resep yang sudah ada
         function loadExistingReseps() {
@@ -290,7 +330,21 @@
         // Event handler untuk menghapus resep
         $(document).on('click', '.remove-res', function() {
             $(this).closest('.row').remove();
+            updateIndexes();
         });
+
+        function updateIndexes() {
+            $('#reseps .row').each(function(index) {
+                $(this).find('input, select').each(function() {
+                    var name = $(this).attr('name');
+                    if (name) {
+                        name = name.replace(/\[\d+\]/, '[' + index +
+                            ']'); // Replace the index with the new one
+                        $(this).attr('name', name);
+                    }
+                });
+            });
+        }
     </script>
     @include('sweetalert::alert')
 @endsection

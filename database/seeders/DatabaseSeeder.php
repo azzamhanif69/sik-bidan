@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'guest@gmail.com',
             'username' => 'guest',
             'image' => 'profil-images/1.jpeg',
-            'is_admin' => 2,
+            'is_admin' => 0,
             'gender' => 'Laki-Laki',
             'password' => bcrypt('rahasia')
         ]);

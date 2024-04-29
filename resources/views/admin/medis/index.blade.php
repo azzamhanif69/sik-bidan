@@ -91,6 +91,8 @@
                                     <th class="text-white">Nama Lengkap</th>
                                     <th class="text-white">Tanggal Periksa</th>
                                     <th class="text-white">Keluhan Utama</th>
+                                    <th class="text-white">Hasil Pemeriksaan</th>
+                                    <th class="text-white">Kesimpulan</th>
                                     <th class="text-white">Terapi</th>
                                     <th class="text-white text-center">Aksi</th>
                                 </tr>
@@ -106,10 +108,13 @@
                                         </td>
                                         <td>{{ $medis->pasien->name }}</td>
                                         <td class="text-justify">
-                                            {{ Carbon\Carbon::parse($medis->created_at)->locale('id')->isoFormat('D MMMM YYYY | H:mm') }}WIB
+                                            {{ Carbon\Carbon::parse($medis->created_at)->locale('id')->isoFormat('D MMMM YYYY | H:mm') }}
+                                            WIB
 
                                         </td>
                                         <td>{{ $medis->keluhan }}</td>
+                                        <td>{{ $medis->pemeriksaan }}</td>
+                                        <td>{{ $medis->kesimpulan }}</td>
                                         <td>
                                             @foreach ($medis->reseps as $resep)
                                                 <span class="bullet">&bull;</span> {{ $resep->obat->nama_obat }}

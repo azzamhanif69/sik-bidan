@@ -63,7 +63,7 @@ class AdminPasienController extends Controller
                 'name' => 'required|string|max:255',
                 'birth' => 'required',
                 'address' => 'required',
-                'date_of_birth' => 'required|integer|min:1',
+                'date_of_birth' => 'required|integer',
                 'gender' => 'required',
                 'phone' => 'required|string|max:255'
             ],
